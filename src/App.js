@@ -8,6 +8,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import LandingPage from './pages/LandingPage';
 import { useSelector, useDispatch } from 'react-redux';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import { fetchMe, setTokens } from './features/authSlice';
 
 function PrivateRoute({ children }) {
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }
