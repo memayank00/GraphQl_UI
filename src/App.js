@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import LandingPage from './pages/LandingPage';
 import { useSelector, useDispatch } from 'react-redux';
 import Header from './components/Header';
 import { fetchMe, setTokens } from './features/authSlice';
@@ -37,6 +38,7 @@ export default function App() {
     <Router>
       <Header />
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={
@@ -46,7 +48,7 @@ export default function App() {
         } />
         <Route path="/login/admin" element={<AdminLoginPage />} />
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
