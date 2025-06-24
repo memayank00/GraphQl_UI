@@ -195,15 +195,22 @@ function EditMovieForm({ movie, onClose, onUpdated }) {
 
 export default function AdminDashboardPage() {
   const adminToken = localStorage.getItem('adminToken');
-  // Persist view in localStorage
-  const [view, setView] = useState(() => localStorage.getItem('adminDashboardView') || 'home');
+  // Set default view to 'movies' for admin
+  const [view, setView] = useState(() => localStorage.getItem('adminDashboardView') || 'movies');
   const [showAddMovie, setShowAddMovie] = useState(false);
-  const [showMovieList, setShowMovieList] = useState(false);
+  const [showMovieList, setShowMovieList] = useState(view === 'movies');
   const [editMovie, setEditMovie] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('adminDashboardView', view);
+    setShowMovieList(view === 'movies');
+    setShowAddMovie(view === 'add');
+    if (view === 'home') {
+      setShowAddMovie(false);
+      setShowMovieList(false);
+      setEditMovie(null);
+    }
   }, [view]);
 
   if (!adminToken) {
@@ -227,12 +234,7 @@ export default function AdminDashboardPage() {
                   textAlign: 'left',
                   cursor: 'pointer'
                 }}
-                onClick={() => {
-                  setView('home');
-                  setShowAddMovie(false);
-                  setShowMovieList(false);
-                  setEditMovie(null);
-                }}
+                onClick={() => setView('home')}
               >
                 🏠 Home
               </button>
@@ -249,12 +251,7 @@ export default function AdminDashboardPage() {
                   textAlign: 'left',
                   cursor: 'pointer'
                 }}
-                onClick={() => {
-                  setShowAddMovie(true);
-                  setShowMovieList(false);
-                  setEditMovie(null);
-                  setView('add');
-                }}
+                onClick={() => setView('add')}
               >
                 ➕ Add Movie
               </button>
@@ -272,11 +269,8 @@ export default function AdminDashboardPage() {
                   cursor: 'pointer'
                 }}
                 onClick={() => {
-                  setShowMovieList(true);
-                  setShowAddMovie(false);
-                  setEditMovie(null);
-                  setRefresh(r => !r);
                   setView('movies');
+                  setRefresh(r => !r);
                 }}
               >
                 🎬 All Movies
@@ -292,8 +286,8 @@ export default function AdminDashboardPage() {
             <p>Select an option from the left menu.</p>
           </div>
         )}
-        {showAddMovie && !editMovie && view === 'add' && <AddMovieForm onClose={() => setShowAddMovie(false)} />}
-        {showMovieList && !editMovie && view === 'movies' && <AdminMovieList onEdit={setEditMovie} key={refresh} />}
+        {showAddMovie && !editMovie && <AddMovieForm onClose={() => setShowAddMovie(false)} />}
+        {showMovieList && !editMovie && <AdminMovieList onEdit={setEditMovie} key={refresh} />}
         {editMovie && <EditMovieForm movie={editMovie} onClose={() => setEditMovie(null)} onUpdated={() => setRefresh(r => !r)} />}
       </main>
     </div>

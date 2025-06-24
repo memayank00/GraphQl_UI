@@ -4,8 +4,6 @@
   padding: 18px 32px;
   text-align: center;
   font-size: 1rem;
-  position: sticky;
-  bottom: 0;
   left: 0;
   width: 100%;
   z-index: 99;
@@ -13,6 +11,16 @@
   flex-direction: column;
   gap: 6px;
   align-items: center;
+  /* Responsive sticky positioning */
+  position: fixed;
+  bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .app-footer {
+    padding: 12px 8px;
+    font-size: 0.95rem;
+  }
 }
 
 .footer-link {

@@ -61,7 +61,10 @@ export default function Header() {
         ) : user ? (
           <>
             <span className="username">👤 {user.username}</span>
-            <button className="logout-btn" onClick={handleLogout}>Logout</button>
+            <button className="logout-btn" onClick={() => {
+              dispatch(logout());
+              navigate('/login');
+            }}>Logout</button>
           </>
         ) : (
           <span className="username guest">Guest</span>
