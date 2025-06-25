@@ -106,18 +106,44 @@ function AdminMovieList({ onEdit }) {
             <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>Cast: {movie.cast}</div>
             <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>Director: {movie.director}</div>
             <div style={{ fontSize: 13, color: '#222' }}>{movie.description}</div>
-            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <div style={{ marginTop: 12, display: 'flex', gap: 24, alignItems: 'center' }}>
               <button
-                style={{ background: '#ff5252', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer' }}
+                style={{
+                  background: '#ffeaea',
+                  border: '1px solid #ff5252',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontSize: 18,
+                  padding: '6px 10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'background 0.2s'
+                }}
+                title="Delete"
                 onClick={() => handleDelete(movie._id)}
-              >Delete</button>
+              >
+                <svg width="20" height="20" fill="#ff5252" viewBox="0 0 20 20"><path d="M7 8v6m3-6v6m3-6v6M4 6h12M5 6V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1m-1 0v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h10z" stroke="#ff5252" strokeWidth="1.2" fill="none"/></svg>
+              </button>
               <button
-                style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer' }}
+                style={{
+                  background: '#e3f0ff',
+                  border: '1px solid #1976d2',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontSize: 18,
+                  padding: '6px 10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'background 0.2s'
+                }}
+                title="Edit"
                 onClick={() => {
                   onEdit(movie);
                   navigate(`/admin/dashboard/edit/${movie._id}`);
                 }}
-              >Edit</button>
+              >
+                <svg width="20" height="20" fill="#1976d2" viewBox="0 0 20 20"><path d="M14.85 2.85a1.2 1.2 0 0 1 1.7 1.7l-1.09 1.09-1.7-1.7 1.09-1.09zm-2.12 2.12l1.7 1.7-8.43 8.43c-.13.13-.29.23-.47.27l-2.5.5a.5.5 0 0 1-.59-.59l.5-2.5c.04-.18.14-.34.27-.47l8.43-8.43z"/></svg>
+              </button>
             </div>
           </div>
         </div>
@@ -128,18 +154,33 @@ function AdminMovieList({ onEdit }) {
 
 function EditMovieForm({ movie, onClose, onUpdated }) {
   const [form, setForm] = useState({
-    title: movie.title,
-    description: movie.description,
-    genre: movie.genre,
-    language: movie.language,
-    releaseDate: movie.releaseDate,
-    duration: movie.duration,
-    cast: movie.cast,
-    director: movie.director,
+    title: movie.title || '',
+    description: movie.description || '',
+    genre: movie.genre || '',
+    language: movie.language || '',
+    releaseDate: movie.releaseDate || '',
+    duration: movie.duration || '',
+    cast: movie.cast || '',
+    director: movie.director || '',
     image: null,
     video: null,
   });
   const [status, setStatus] = useState('');
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!form.title.trim()) newErrors.title = 'Movie name is required';
+    if (!form.description.trim()) newErrors.description = 'Description is required';
+    if (!form.genre.trim()) newErrors.genre = 'Genre is required';
+    if (!form.language.trim()) newErrors.language = 'Language is required';
+    if (!form.releaseDate) newErrors.releaseDate = 'Release date is required';
+    if (!form.duration.trim()) newErrors.duration = 'Duration is required';
+    if (!form.cast.trim()) newErrors.cast = 'Cast is required';
+    if (!form.director.trim()) newErrors.director = 'Director is required';
+    return newErrors;
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -148,11 +189,20 @@ function EditMovieForm({ movie, onClose, onUpdated }) {
     } else {
       setForm({ ...form, [name]: value });
     }
+    setErrors({ ...errors, [name]: undefined });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('');
+    setLoading(true);
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setStatus('Please fix the errors above.');
+      setLoading(false);
+      return;
+    }
     const data = new FormData();
     Object.entries(form).forEach(([key, value]) => {
       if (value) data.append(key, value);
@@ -165,35 +215,282 @@ function EditMovieForm({ movie, onClose, onUpdated }) {
         }
       });
       setStatus('Movie updated successfully!');
-      onUpdated();
-      onClose();
+      if (onUpdated) onUpdated();
+      setTimeout(() => {
+        setStatus('');
+        if (onClose) onClose();
+      }, 1000);
     } catch (err) {
       setStatus(err.response?.data?.message || 'Failed to update movie');
     }
+    setLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ background: '#fff', padding: 32, borderRadius: 8, maxWidth: 600 }}>
-      <h2>Edit Movie</h2>
-      <input name="title" value={form.title} onChange={handleChange} placeholder="Movie Name" required style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" required style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <input name="genre" value={form.genre} onChange={handleChange} placeholder="Genre" style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <input name="language" value={form.language} onChange={handleChange} placeholder="Language" style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <input name="releaseDate" type="date" value={form.releaseDate} onChange={handleChange} placeholder="Release Date" style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <input name="duration" value={form.duration} onChange={handleChange} placeholder="Duration (e.g. 2h 10m)" style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <input name="cast" value={form.cast} onChange={handleChange} placeholder="Cast (comma separated)" style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <input name="director" value={form.director} onChange={handleChange} placeholder="Director" style={{ width: '100%', marginBottom: 12, padding: 8 }} />
-      <div style={{ marginBottom: 12 }}>
-        <label>Movie Image: </label>
-        <input name="image" type="file" accept="image/*" onChange={handleChange} />
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        maxWidth: 600,
+        margin: '40px auto',
+        padding: 32,
+        background: '#fff',
+        borderRadius: 16,
+        boxShadow: '0 4px 24px #0001',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 18
+      }}
+    >
+      <h2 style={{
+        textAlign: 'center',
+        marginBottom: 8,
+        color: '#1976d2',
+        fontWeight: 700,
+        letterSpacing: 1
+      }}>Edit Movie</h2>
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Title</label>
+          <input
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Movie Title"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.title && <div style={{ color: 'red', marginTop: 4 }}>{errors.title}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Genre</label>
+          <input
+            name="genre"
+            value={form.genre}
+            onChange={handleChange}
+            placeholder="Genre"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.genre && <div style={{ color: 'red', marginTop: 4 }}>{errors.genre}</div>}
+        </div>
       </div>
-      <div style={{ marginBottom: 12 }}>
-        <label>Movie File: </label>
-        <input name="video" type="file" accept="video/*" onChange={handleChange} />
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Language</label>
+          <input
+            name="language"
+            value={form.language}
+            onChange={handleChange}
+            placeholder="Language"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.language && <div style={{ color: 'red', marginTop: 4 }}>{errors.language}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Release Date</label>
+          <input
+            name="releaseDate"
+            type="date"
+            value={form.releaseDate}
+            onChange={handleChange}
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.releaseDate && <div style={{ color: 'red', marginTop: 4 }}>{errors.releaseDate}</div>}
+        </div>
       </div>
-      <button type="submit" style={{ padding: 10, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4 }}>Update Movie</button>
-      <button type="button" onClick={onClose} style={{ marginLeft: 16, padding: 10, background: '#aaa', color: '#fff', border: 'none', borderRadius: 4 }}>Cancel</button>
-      {status && <div style={{ marginTop: 16, color: status.includes('success') ? 'green' : 'red' }}>{status}</div>}
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Duration</label>
+          <input
+            name="duration"
+            value={form.duration}
+            onChange={handleChange}
+            placeholder="e.g. 2h 10m"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.duration && <div style={{ color: 'red', marginTop: 4 }}>{errors.duration}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Director</label>
+          <input
+            name="director"
+            value={form.director}
+            onChange={handleChange}
+            placeholder="Director"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.director && <div style={{ color: 'red', marginTop: 4 }}>{errors.director}</div>}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Cast</label>
+          <input
+            name="cast"
+            value={form.cast}
+            onChange={handleChange}
+            placeholder="Cast (comma separated)"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.cast && <div style={{ color: 'red', marginTop: 4 }}>{errors.cast}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Movie Image</label>
+          <input
+            name="image"
+            type="file"
+            accept="image/*"
+            onChange={handleChange}
+            style={{
+              padding: '8px 0',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 15,
+              outline: 'none',
+              background: '#f8f8f8'
+            }}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Description</label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Movie Description"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none',
+              minHeight: 70,
+              resize: 'vertical'
+            }}
+            required
+          />
+          {errors.description && <div style={{ color: 'red', marginTop: 4 }}>{errors.description}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Movie File</label>
+          <input
+            name="video"
+            type="file"
+            accept="video/*"
+            onChange={handleChange}
+            style={{
+              padding: '8px 0',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 15,
+              outline: 'none',
+              background: '#f8f8f8'
+            }}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 14, marginTop: 10 }}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            flex: 1,
+            padding: '12px 0',
+            borderRadius: 8,
+            background: 'linear-gradient(90deg, #1976d2 60%, #43cea2 100%)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 17,
+            border: 'none',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            boxShadow: '0 2px 8px #1976d233'
+          }}
+        >
+          {loading ? 'Updating...' : 'Update Movie'}
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            flex: 1,
+            padding: '12px 0',
+            borderRadius: 8,
+            background: '#aaa',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 17,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+      {status && (
+        <div style={{
+          marginTop: 10,
+          color: status.includes('success') ? 'green' : 'red',
+          textAlign: 'center',
+          fontWeight: 500
+        }}>
+          {status}
+        </div>
+      )}
     </form>
   );
 }
@@ -280,13 +577,19 @@ function UserListPage() {
               </td>
               <td style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0' }}>
                 <button
-                  style={{ marginRight: 8, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer' }}
+                  style={{ marginRight: 8, background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}
+                  title="Edit"
                   onClick={() => handleEdit(u)}
-                >Edit</button>
+                >
+                  <svg width="20" height="20" fill="#1976d2" viewBox="0 0 20 20"><path d="M14.85 2.85a1.2 1.2 0 0 1 1.7 1.7l-1.09 1.09-1.7-1.7 1.09-1.09zm-2.12 2.12l1.7 1.7-8.43 8.43c-.13.13-.29.23-.47.27l-2.5.5a.5.5 0 0 1-.59-.59l.5-2.5c.04-.18.14-.34.27-.47l8.43-8.43z"/></svg>
+                </button>
                 <button
-                  style={{ background: '#ff5252', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}
+                  title="Delete"
                   onClick={() => handleDelete(u._id)}
-                >Delete</button>
+                >
+                  <svg width="20" height="20" fill="#ff5252" viewBox="0 0 20 20"><path d="M7 8v6m3-6v6m3-6v6M4 6h12M5 6V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1m-1 0v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h10z" stroke="#ff5252" strokeWidth="1.2" fill="none"/></svg>
+                </button>
               </td>
             </tr>
           ))}
@@ -363,7 +666,7 @@ function EditUserForm({ user, onClose }) {
   );
 }
 
-export default function AdminDashboardPage() {
+function AdminDashboardPage() {
   const adminToken = localStorage.getItem('adminToken');
   const [editMovie, setEditMovie] = useState(null);
   const [refresh, setRefresh] = useState(false);
@@ -402,8 +705,16 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '80vh', background: '#f5f6fa' }}>
-      <aside style={{ width: 220, background: '#3a4668', color: '#fff', padding: '32px 0', minHeight: '100%' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f5f6fa' }}>
+      <aside style={{
+        width: 220,
+        background: '#3a4668',
+        color: '#fff',
+        padding: '32px 0',
+        minHeight: '100vh', // ensure sidebar stretches to full viewport height
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         <nav>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             <li>
@@ -480,7 +791,7 @@ export default function AdminDashboardPage() {
           </ul>
         </nav>
       </aside>
-      <main style={{ flex: 1, padding: 40 }}>
+      <main style={{ flex: 1, padding: 40, minHeight: '100vh', background: '#f5f6fa' }}>
         <Routes>
           <Route path="home" element={<AdminDashboardHome />} />
           <Route path="add" element={<AddMovieForm onClose={() => navigate('/admin/dashboard/movies')} />} />
@@ -494,3 +805,4 @@ export default function AdminDashboardPage() {
   );
 }
 
+export default AdminDashboardPage;

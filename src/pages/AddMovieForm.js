@@ -82,103 +82,273 @@ export default function AddMovieForm({ onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ background: '#fff', padding: 32, borderRadius: 8, maxWidth: 600 }}>
-      <h2>Add Movie</h2>
-      <input
-        name="title"
-        value={form.title}
-        onChange={handleChange}
-        placeholder="Movie Name"
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.title && <div style={{ color: 'red', marginBottom: 8 }}>{errors.title}</div>}
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        maxWidth: 600,
+        margin: '40px auto',
+        padding: 32,
+        background: '#fff',
+        borderRadius: 16,
+        boxShadow: '0 4px 24px #0001',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 18 // reduced gap for less space between fields
+      }}
+    >
+      <h2 style={{
+        textAlign: 'center',
+        marginBottom: 8,
+        color: '#1976d2',
+        fontWeight: 700,
+        letterSpacing: 1
+      }}>Add New Movie</h2>
 
-      <textarea
-        name="description"
-        value={form.description}
-        onChange={handleChange}
-        placeholder="Description"
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.description && <div style={{ color: 'red', marginBottom: 8 }}>{errors.description}</div>}
-
-      <input
-        name="genre"
-        value={form.genre}
-        onChange={handleChange}
-        placeholder="Genre"
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.genre && <div style={{ color: 'red', marginBottom: 8 }}>{errors.genre}</div>}
-
-      <input
-        name="language"
-        value={form.language}
-        onChange={handleChange}
-        placeholder="Language"
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.language && <div style={{ color: 'red', marginBottom: 8 }}>{errors.language}</div>}
-
-      <input
-        name="releaseDate"
-        type="date"
-        value={form.releaseDate}
-        onChange={handleChange}
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.releaseDate && <div style={{ color: 'red', marginBottom: 8 }}>{errors.releaseDate}</div>}
-
-      <input
-        name="duration"
-        value={form.duration}
-        onChange={handleChange}
-        placeholder="Duration (e.g. 2h 10m)"
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.duration && <div style={{ color: 'red', marginBottom: 8 }}>{errors.duration}</div>}
-
-      <input
-        name="cast"
-        value={form.cast}
-        onChange={handleChange}
-        placeholder="Cast (comma separated)"
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.cast && <div style={{ color: 'red', marginBottom: 8 }}>{errors.cast}</div>}
-
-      <input
-        name="director"
-        value={form.director}
-        onChange={handleChange}
-        placeholder="Director"
-        required
-        style={{ width: '100%', marginBottom: 4, padding: 8 }}
-      />
-      {errors.director && <div style={{ color: 'red', marginBottom: 8 }}>{errors.director}</div>}
-
-      <div style={{ marginBottom: 4 }}>
-        <label>Movie Image: </label>
-        <input name="image" type="file" accept="image/*" onChange={handleChange} required />
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Title</label>
+          <input
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Movie Title"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.title && <div style={{ color: 'red', marginTop: 4 }}>{errors.title}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Genre</label>
+          <input
+            name="genre"
+            value={form.genre}
+            onChange={handleChange}
+            placeholder="Genre"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.genre && <div style={{ color: 'red', marginTop: 4 }}>{errors.genre}</div>}
+        </div>
       </div>
-      {errors.image && <div style={{ color: 'red', marginBottom: 8 }}>{errors.image}</div>}
 
-      <div style={{ marginBottom: 4 }}>
-        <label>Movie File: </label>
-        <input name="video" type="file" accept="video/*" onChange={handleChange} required />
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Language</label>
+          <input
+            name="language"
+            value={form.language}
+            onChange={handleChange}
+            placeholder="Language"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.language && <div style={{ color: 'red', marginTop: 4 }}>{errors.language}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Release Date</label>
+          <input
+            name="releaseDate"
+            type="date"
+            value={form.releaseDate}
+            onChange={handleChange}
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.releaseDate && <div style={{ color: 'red', marginTop: 4 }}>{errors.releaseDate}</div>}
+        </div>
       </div>
-      {errors.video && <div style={{ color: 'red', marginBottom: 8 }}>{errors.video}</div>}
 
-      <button type="submit" style={{ padding: 10, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4 }}>Add Movie</button>
-      <button type="button" onClick={onClose} style={{ marginLeft: 16, padding: 10, background: '#aaa', color: '#fff', border: 'none', borderRadius: 4 }}>Cancel</button>
-      {status && <div style={{ marginTop: 16, color: status.includes('success') ? 'green' : 'red' }}>{status}</div>}
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Duration</label>
+          <input
+            name="duration"
+            value={form.duration}
+            onChange={handleChange}
+            placeholder="e.g. 2h 10m"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.duration && <div style={{ color: 'red', marginTop: 4 }}>{errors.duration}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Director</label>
+          <input
+            name="director"
+            value={form.director}
+            onChange={handleChange}
+            placeholder="Director"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.director && <div style={{ color: 'red', marginTop: 4 }}>{errors.director}</div>}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Cast</label>
+          <input
+            name="cast"
+            value={form.cast}
+            onChange={handleChange}
+            placeholder="Cast (comma separated)"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none'
+            }}
+            required
+          />
+          {errors.cast && <div style={{ color: 'red', marginTop: 4 }}>{errors.cast}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Movie Image</label>
+          <input
+            name="image"
+            type="file"
+            accept="image/*"
+            onChange={handleChange}
+            style={{
+              padding: '8px 0',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 15,
+              outline: 'none',
+              background: '#f8f8f8'
+            }}
+            required
+          />
+          {errors.image && <div style={{ color: 'red', marginTop: 4 }}>{errors.image}</div>}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Description</label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Movie Description"
+            style={{
+              padding: '12px 14px',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 16,
+              outline: 'none',
+              minHeight: 70,
+              resize: 'vertical'
+            }}
+            required
+          />
+          {errors.description && <div style={{ color: 'red', marginTop: 4 }}>{errors.description}</div>}
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontWeight: 500, color: '#333', marginBottom: 6 }}>Movie File</label>
+          <input
+            name="video"
+            type="file"
+            accept="video/*"
+            onChange={handleChange}
+            style={{
+              padding: '8px 0',
+              borderRadius: 8,
+              border: '1.5px solid #bdbdbd',
+              fontSize: 15,
+              outline: 'none',
+              background: '#f8f8f8'
+            }}
+            required
+          />
+          {errors.video && <div style={{ color: 'red', marginTop: 4 }}>{errors.video}</div>}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 14, marginTop: 10 }}>
+        <button
+          type="submit"
+          style={{
+            flex: 1,
+            padding: '12px 0',
+            borderRadius: 8,
+            background: 'linear-gradient(90deg, #1976d2 60%, #43cea2 100%)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 17,
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px #1976d233'
+          }}
+        >
+          Add Movie
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            flex: 1,
+            padding: '12px 0',
+            borderRadius: 8,
+            background: '#aaa',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 17,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+      {status && (
+        <div style={{
+          marginTop: 10,
+          color: status.includes('success') ? 'green' : 'red',
+          textAlign: 'center',
+          fontWeight: 500
+        }}>
+          {status}
+        </div>
+      )}
     </form>
   );
 }
