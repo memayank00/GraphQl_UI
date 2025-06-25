@@ -7,12 +7,12 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { accessToken, status, error } = useSelector(state => state.auth);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await dispatch(loginUser({ username, password }));
+    await dispatch(loginUser({ email, password }));
   };
 
   React.useEffect(() => {
@@ -39,11 +39,12 @@ export default function LoginPage() {
         }}
       >
         <h2 style={{ textAlign: 'center', marginBottom: 8, color: '#1976d2', fontWeight: 700 }}>User Login</h2>
-        <label style={{ fontWeight: 500, color: '#333', marginBottom: 2 }}>Username</label>
+        <label style={{ fontWeight: 500, color: '#333', marginBottom: 2 }}>Email</label>
         <input
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          placeholder="Enter your username"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          type="email"
           style={{
             padding: '12px 14px',
             borderRadius: 8,
@@ -55,7 +56,7 @@ export default function LoginPage() {
           }}
           onFocus={e => e.target.style.border = '1.5px solid #1976d2'}
           onBlur={e => e.target.style.border = '1.5px solid #bdbdbd'}
-          autoComplete="username"
+          autoComplete="email"
         />
         <label style={{ fontWeight: 500, color: '#333', marginBottom: 2 }}>Password</label>
         <input

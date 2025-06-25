@@ -11,16 +11,16 @@ const initialState = {
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async ({ username, password }, thunkAPI) => {
-    const response = await login(username, password);
+  async ({ email, password }, thunkAPI) => {
+    const response = await login(email, password);
     return response.data;
   }
 );
 
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
-  async ({ username, password }, thunkAPI) => {
-    const response = await register(username, password);
+  async (form, thunkAPI) => {
+    const response = await register(form);
     return response.data;
   }
 );

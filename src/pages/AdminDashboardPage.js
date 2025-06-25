@@ -207,10 +207,167 @@ function AdminDashboardHome() {
   );
 }
 
+function UserListPage() {
+  const [users, setUsers] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [editUser, setEditUser] = React.useState(null);
+  const [refresh, setRefresh] = React.useState(false);
+
+  React.useEffect(() => {
+    setLoading(true);
+    axios.get('http://localhost:3000/api/admin/users', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+    })
+      .then(res => {
+        setUsers(res.data.users || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [refresh]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    await axios.delete(`http://localhost:3000/api/admin/users/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+    });
+    setRefresh(r => !r);
+  };
+
+  const handleEdit = (user) => {
+    setEditUser(user);
+  };
+
+  if (loading) return <div>Loading users...</div>;
+  if (editUser) return <EditUserForm user={editUser} onClose={() => { setEditUser(null); setRefresh(r => !r); }} />;
+  if (!users.length) return <div>No users found.</div>;
+
+  return (
+    <div style={{
+      background: '#fff',
+      borderRadius: 12,
+      padding: 32,
+      maxWidth: 800,
+      margin: '0 auto',
+      boxShadow: '0 4px 24px #0001'
+    }}>
+      <h2 style={{ marginBottom: 24, color: '#1976d2', fontWeight: 700, textAlign: 'center' }}>Registered Users</h2>
+      <table style={{
+        width: '100%',
+        borderCollapse: 'separate',
+        borderSpacing: 0,
+        background: '#fafbfc',
+        borderRadius: 8,
+        overflow: 'hidden',
+        boxShadow: '0 2px 8px #1976d211'
+      }}>
+        <thead>
+          <tr style={{ background: '#f5f6fa' }}>
+            <th style={{ padding: '14px 12px', borderBottom: '2px solid #e3e3e3', textAlign: 'left', fontWeight: 600, color: '#333' }}>#</th>
+            <th style={{ padding: '14px 12px', borderBottom: '2px solid #e3e3e3', textAlign: 'left', fontWeight: 600, color: '#333' }}>Username</th>
+            <th style={{ padding: '14px 12px', borderBottom: '2px solid #e3e3e3', textAlign: 'left', fontWeight: 600, color: '#333' }}>Email</th>
+            <th style={{ padding: '14px 12px', borderBottom: '2px solid #e3e3e3', textAlign: 'left', fontWeight: 600, color: '#333' }}>Registered At</th>
+            <th style={{ padding: '14px 12px', borderBottom: '2px solid #e3e3e3', textAlign: 'left', fontWeight: 600, color: '#333' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((u, idx) => (
+            <tr key={u._id} style={{ background: idx % 2 === 0 ? '#fff' : '#f7f9fa' }}>
+              <td style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', color: '#888' }}>{idx + 1}</td>
+              <td style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', fontWeight: 500 }}>{u.username}</td>
+              <td style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0' }}>{u.email || <span style={{ color: '#bbb' }}>-</span>}</td>
+              <td style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', color: '#555' }}>
+                {u.createdAt ? new Date(u.createdAt).toLocaleString() : <span style={{ color: '#bbb' }}>-</span>}
+              </td>
+              <td style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0' }}>
+                <button
+                  style={{ marginRight: 8, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer' }}
+                  onClick={() => handleEdit(u)}
+                >Edit</button>
+                <button
+                  style={{ background: '#ff5252', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer' }}
+                  onClick={() => handleDelete(u._id)}
+                >Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function EditUserForm({ user, onClose }) {
+  const [form, setForm] = React.useState({
+    username: user.username,
+    email: user.email || '',
+    firstName: user.firstName || '',
+    lastName: user.lastName || '',
+    sex: user.sex || '',
+    dob: user.dob || ''
+  });
+  const [status, setStatus] = React.useState('');
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('');
+    try {
+      await axios.put(`http://localhost:3000/api/admin/users/${user._id}`, form, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setStatus('User updated successfully!');
+      setTimeout(onClose, 1000);
+    } catch (err) {
+      setStatus(err.response?.data?.message || 'Failed to update user');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{
+      background: '#fff',
+      padding: 32,
+      borderRadius: 8,
+      maxWidth: 400,
+      margin: '40px auto',
+      boxShadow: '0 4px 24px #0001',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14
+    }}>
+      <h2>Edit User</h2>
+      <label>Username</label>
+      <input name="username" value={form.username} onChange={handleChange} style={{ padding: 10, borderRadius: 6, border: '1.5px solid #bdbdbd' }} />
+      <label>Email</label>
+      <input name="email" value={form.email} onChange={handleChange} style={{ padding: 10, borderRadius: 6, border: '1.5px solid #bdbdbd' }} />
+      <label>First Name</label>
+      <input name="firstName" value={form.firstName} onChange={handleChange} style={{ padding: 10, borderRadius: 6, border: '1.5px solid #bdbdbd' }} />
+      <label>Last Name</label>
+      <input name="lastName" value={form.lastName} onChange={handleChange} style={{ padding: 10, borderRadius: 6, border: '1.5px solid #bdbdbd' }} />
+      <label>Sex</label>
+      <select name="sex" value={form.sex} onChange={handleChange} style={{ padding: 10, borderRadius: 6, border: '1.5px solid #bdbdbd' }}>
+        <option value="">Select</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>
+      <label>Date of Birth</label>
+      <input name="dob" type="date" value={form.dob} onChange={handleChange} style={{ padding: 10, borderRadius: 6, border: '1.5px solid #bdbdbd' }} />
+      <button type="submit" style={{ padding: 10, borderRadius: 6, background: '#1976d2', color: '#fff', border: 'none', marginTop: 10 }}>Update</button>
+      <button type="button" onClick={onClose} style={{ padding: 10, borderRadius: 6, background: '#aaa', color: '#fff', border: 'none', marginTop: 10 }}>Cancel</button>
+      {status && <div style={{ marginTop: 10, color: status.includes('success') ? 'green' : 'red' }}>{status}</div>}
+    </form>
+  );
+}
+
 export default function AdminDashboardPage() {
   const adminToken = localStorage.getItem('adminToken');
   const [editMovie, setEditMovie] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [view, setView] = useState(() => localStorage.getItem('adminDashboardView') || 'movies');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -303,6 +460,23 @@ export default function AdminDashboardPage() {
                 🎬 All Movies
               </button>
             </li>
+            <li>
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: 18,
+                  padding: '12px 32px',
+                  width: '100%',
+                  textAlign: 'left',
+                  cursor: 'pointer'
+                }}
+                onClick={() => navigate('/admin/dashboard/users')}
+              >
+                👥 All Users
+              </button>
+            </li>
           </ul>
         </nav>
       </aside>
@@ -312,9 +486,11 @@ export default function AdminDashboardPage() {
           <Route path="add" element={<AddMovieForm onClose={() => navigate('/admin/dashboard/movies')} />} />
           <Route path="movies" element={<AdminMovieList onEdit={setEditMovie} key={refresh} />} />
           <Route path="edit/:id" element={editMovie ? <EditMovieForm movie={editMovie} onClose={() => navigate('/admin/dashboard/movies')} onUpdated={() => setRefresh(r => !r)} /> : <Navigate to="/admin/dashboard/movies" />} />
+          <Route path="users" element={<UserListPage />} />
           <Route path="*" element={<Navigate to="/admin/dashboard/movies" />} />
         </Routes>
       </main>
     </div>
   );
 }
+

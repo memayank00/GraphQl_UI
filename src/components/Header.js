@@ -2,9 +2,10 @@ import React from 'react';
 import './Header.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/authSlice';
+// Revert to react-router-dom for hooks support
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/ott_kids.png';
-console.log("--------000")
+
 export default function Header() {
   const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
