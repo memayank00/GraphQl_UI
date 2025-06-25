@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddMovieForm from './AddMovieForm';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 function AdminMovieList({ onEdit }) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [playingMovie, setPlayingMovie] = useState(null);
+  const navigate = useNavigate();
 
   const fetchMovies = () => {
     setLoading(true);
@@ -111,7 +113,10 @@ function AdminMovieList({ onEdit }) {
               >Delete</button>
               <button
                 style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer' }}
-                onClick={() => onEdit(movie)}
+                onClick={() => {
+                  onEdit(movie);
+                  navigate(`/admin/dashboard/edit/${movie._id}`);
+                }}
               >Edit</button>
             </div>
           </div>
@@ -193,25 +198,47 @@ function EditMovieForm({ movie, onClose, onUpdated }) {
   );
 }
 
+function AdminDashboardHome() {
+  return (
+    <div>
+      <h2>Welcome, <b>admin</b>!</h2>
+      <p>Select an option from the left menu.</p>
+    </div>
+  );
+}
+
 export default function AdminDashboardPage() {
   const adminToken = localStorage.getItem('adminToken');
-  // Set default view to 'movies' for admin
-  const [view, setView] = useState(() => localStorage.getItem('adminDashboardView') || 'movies');
-  const [showAddMovie, setShowAddMovie] = useState(false);
-  const [showMovieList, setShowMovieList] = useState(view === 'movies');
   const [editMovie, setEditMovie] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    localStorage.setItem('adminDashboardView', view);
-    setShowMovieList(view === 'movies');
-    setShowAddMovie(view === 'add');
-    if (view === 'home') {
-      setShowAddMovie(false);
-      setShowMovieList(false);
+    // Redirect to /admin/dashboard/movies if at /admin/dashboard
+    if (location.pathname === '/admin/dashboard') {
+      navigate('/admin/dashboard/movies', { replace: true });
+    }
+  }, [location, navigate]);
+
+  // Listen for route changes to set editMovie based on URL
+  useEffect(() => {
+    const match = location.pathname.match(/^\/admin\/dashboard\/edit\/(.+)$/);
+    if (match) {
+      const movieId = match[1];
+      // Fetch movie details if not already set or if different movie
+      if (!editMovie || editMovie._id !== movieId) {
+        axios.get(`http://localhost:3000/api/admin/movies`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        }).then(res => {
+          const found = (res.data.movies || []).find(m => m._id === movieId);
+          if (found) setEditMovie(found);
+        });
+      }
+    } else {
       setEditMovie(null);
     }
-  }, [view]);
+  }, [location.pathname]);
 
   if (!adminToken) {
     return <div style={{ maxWidth: 600, margin: '40px auto', padding: 24, background: '#fff', borderRadius: 8 }}>You are not authorized.</div>;
@@ -234,7 +261,7 @@ export default function AdminDashboardPage() {
                   textAlign: 'left',
                   cursor: 'pointer'
                 }}
-                onClick={() => setView('home')}
+                onClick={() => navigate('/admin/dashboard/home')}
               >
                 🏠 Home
               </button>
@@ -251,7 +278,7 @@ export default function AdminDashboardPage() {
                   textAlign: 'left',
                   cursor: 'pointer'
                 }}
-                onClick={() => setView('add')}
+                onClick={() => navigate('/admin/dashboard/add')}
               >
                 ➕ Add Movie
               </button>
@@ -269,7 +296,7 @@ export default function AdminDashboardPage() {
                   cursor: 'pointer'
                 }}
                 onClick={() => {
-                  setView('movies');
+                  navigate('/admin/dashboard/movies');
                   setRefresh(r => !r);
                 }}
               >
@@ -280,15 +307,13 @@ export default function AdminDashboardPage() {
         </nav>
       </aside>
       <main style={{ flex: 1, padding: 40 }}>
-        {view === 'home' && (
-          <div>
-            <h2>Welcome, <b>admin</b>!</h2>
-            <p>Select an option from the left menu.</p>
-          </div>
-        )}
-        {showAddMovie && !editMovie && <AddMovieForm onClose={() => setShowAddMovie(false)} />}
-        {showMovieList && !editMovie && <AdminMovieList onEdit={setEditMovie} key={refresh} />}
-        {editMovie && <EditMovieForm movie={editMovie} onClose={() => setEditMovie(null)} onUpdated={() => setRefresh(r => !r)} />}
+        <Routes>
+          <Route path="home" element={<AdminDashboardHome />} />
+          <Route path="add" element={<AddMovieForm onClose={() => navigate('/admin/dashboard/movies')} />} />
+          <Route path="movies" element={<AdminMovieList onEdit={setEditMovie} key={refresh} />} />
+          <Route path="edit/:id" element={editMovie ? <EditMovieForm movie={editMovie} onClose={() => navigate('/admin/dashboard/movies')} onUpdated={() => setRefresh(r => !r)} /> : <Navigate to="/admin/dashboard/movies" />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard/movies" />} />
+        </Routes>
       </main>
     </div>
   );

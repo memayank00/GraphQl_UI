@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 function MovieList() {
   const [movies, setMovies] = useState([]);
@@ -97,14 +98,27 @@ function MovieList() {
   );
 }
 
-export default function DashboardPage() {
+function DashboardHome() {
   const user = useSelector(state => state.auth.user);
-  // Persist view in localStorage
-  const [view, setView] = useState(() => localStorage.getItem('userDashboardView') || 'home');
+  return (
+    <>
+      <h2>User Dashboard</h2>
+      <div>Welcome, <b>{user?.username || 'User'}</b>!</div>
+      <p>Select an option from the left menu.</p>
+    </>
+  );
+}
 
-  useEffect(() => {
-    localStorage.setItem('userDashboardView', view);
-  }, [view]);
+export default function DashboardPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    // Redirect to /dashboard/home if at /dashboard
+    if (location.pathname === '/dashboard') {
+      navigate('/dashboard/home', { replace: true });
+    }
+  }, [location, navigate]);
 
   return (
     <div style={{ display: 'flex', minHeight: '80vh', background: '#f5f6fa' }}>
@@ -123,7 +137,7 @@ export default function DashboardPage() {
                   textAlign: 'left',
                   cursor: 'pointer'
                 }}
-                onClick={() => setView('home')}
+                onClick={() => navigate('/dashboard/home')}
               >
                 🏠 Home
               </button>
@@ -140,7 +154,7 @@ export default function DashboardPage() {
                   textAlign: 'left',
                   cursor: 'pointer'
                 }}
-                onClick={() => setView('movies')}
+                onClick={() => navigate('/dashboard/movies')}
               >
                 🎬 All Movies
               </button>
@@ -150,15 +164,11 @@ export default function DashboardPage() {
         </nav>
       </aside>
       <main style={{ flex: 1, padding: 40 }}>
-        {view === 'movies' ? (
-          <MovieList />
-        ) : (
-          <>
-            <h2>User Dashboard</h2>
-            <div>Welcome, <b>{user?.username || 'User'}</b>!</div>
-            <p>Select an option from the left menu.</p>
-          </>
-        )}
+        <Routes>
+          <Route path="home" element={<DashboardHome />} />
+          <Route path="movies" element={<MovieList />} />
+          <Route path="*" element={<Navigate to="/dashboard/home" />} />
+        </Routes>
       </main>
     </div>
   );

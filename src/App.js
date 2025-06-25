@@ -20,8 +20,7 @@ export default function App() {
   const accessToken = useSelector(state => state.auth.accessToken);
   const dispatch = useDispatch();
 
-  React.useEffect(() => {
-    // On mount, if tokens exist in localStorage but not in Redux, sync them
+  useEffect(() => {
     const storedAccessToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
     if (storedAccessToken && storedRefreshToken && !accessToken) {
@@ -29,7 +28,7 @@ export default function App() {
     }
   }, [accessToken, dispatch]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (accessToken) {
       dispatch(fetchMe(accessToken));
     }
@@ -42,13 +41,13 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={
+        <Route path="/dashboard/*" element={
           <PrivateRoute>
             <DashboardPage />
           </PrivateRoute>
         } />
         <Route path="/login/admin" element={<AdminLoginPage />} />
-        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin/dashboard/*" element={<AdminDashboardPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <Footer />
